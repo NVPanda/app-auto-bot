@@ -1,11 +1,40 @@
 import pyautogui
 import time
 
-print("Mova o mouse até o canto superior esquerdo da área desejada...")
-time.sleep(5)  # te dá tempo de posicionar
-print("Posição inicial:", pyautogui.position())
 
-time.sleep(5)
-print("Agora mova o mouse até o canto inferior direito da área...")
-time.sleep(5)
-print("Posição final:", pyautogui.position())
+print("Posicione o mouse no **lado esquerdo** e aguarde 3 segundos...")
+print(1)
+time.sleep(0.5)
+print(2)
+time.sleep(0.5)
+print(3)
+time.sleep(0.5)
+
+print(4)
+time.sleep(0.5)
+
+print(5)
+
+
+
+time.sleep(3)
+x1, y1 = pyautogui.position()
+print(f"Lado esquerdo capturado: ({x1}, {y1})")
+
+print("Agora posicione o mouse no **lado direito** e aguarde 3 segundos...")
+print(1)
+time.sleep(0.5)
+
+print(2)
+time.sleep(0.5)
+
+print(3)
+time.sleep(0.5)
+
+print(4)
+time.sleep(0.5)
+
+print(5)
+time.sleep(3)
+x2, y2 = pyautogui.position()
+print(f"Lado direito capturado: ({x2}, {y2})")

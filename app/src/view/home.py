@@ -68,7 +68,7 @@ def filtro_completo():
 
 
 
-def logs_in_app():
+def logs_in_app(page):
     return Container(
         expand=True,
         bgcolor="111111",

@@ -4,6 +4,10 @@ from utils.tabsnav import build_tabs
 from flet import *
 import flet
 
+import os
+from dotenv import load_dotenv
+
+
 def main(page: Page):
     page.bgcolor = "#121212"
     page.title = "Auto Bot"
@@ -14,6 +18,12 @@ def main(page: Page):
     page.window.height = 500
     page.maximizable = False
 
+
+    # Carregando variáveis de ambiente
+    root_project_path = os.path.dirname(os.path.abspath(__file__))
+    dotenv_path = os.path.join(root_project_path, "../../.env.local")
+    load_dotenv(dotenv_path)
+    
 
 
 

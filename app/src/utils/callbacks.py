@@ -13,6 +13,7 @@ def youchangechoice(e, page, content_section):
             content_section.controls.extend([
             filtro_completo()
             ])
+            
 
         
         case "Mensagens":
@@ -22,19 +23,19 @@ def youchangechoice(e, page, content_section):
             
         
         case "Inicia":
-            content_section.controls.clear()
+           
 
             content_section.controls.extend([
+                
             inicia_automacao(page, content_section)
             ])
 
             
-            
-
         
         case "Logs":
             content_section.controls.extend([
-                logs_in_app()
+                logs_in_app(page)
             ])
+           
 
     page.update()
