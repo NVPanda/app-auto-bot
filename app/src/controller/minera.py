@@ -17,19 +17,78 @@ load_dotenv(dotenv_path)
 
 def abrir_site_e_pesquisar():
     pyautogui.PAUSE = 1.0
+   
+   
+        
+            
+    
 
-    # Abrindo o navegador
     pyautogui.press("win")
-    pyautogui.write(os.getenv("NAVEGADOR"), interval=0.09)
+    pyautogui.sleep(3)
+    pyautogui.write("Firefox", interval=0.09)
     pyautogui.press("enter")
     pyautogui.sleep(10)
 
-    # Acessando o site
-    pyautogui.click(x=413, y=118)
-    pyautogui.write(os.getenv("SITE"), interval=0.1)
-    pyautogui.press("enter")
-    pyautogui.sleep(15)
+     # Abrindo o navegador
+    x_nav, y_nav, w_nav, h_nav = 49, 34, 648, 135
+    screenshot_nav = pyautogui.screenshot(region=(x_nav,y_nav,w_nav,h_nav))
+    data_nav = pytesseract.image_to_string(screenshot_nav,output_type=pytesseract.Output.DICT)
 
+
+    for i in range(len(data_nav)):
+
+        palavra = data_nav["text"][i].strip()
+        similaridade = fuzz.ratio(palavra.lower(), "Pesquisar com Google ou introduzir endereço")
+
+        if similaridade >= 70:  # Aceita palavras próximas como "filt", "fitro", etc.
+            text_x = int(data_nav["left"][i])
+            text_y = int(data_nav["top"][i])
+            text_w = int(data_nav["width"][i])
+            text_h = int(data_nav["height"][i])
+
+            real_x = x_filtro + text_x + text_w // 2
+            real_y = y_filtro + text_y + text_h // 2
+
+            pyautogui.click(real_x, real_y)
+            pyautogui.sleep(5)
+            pyautogui.click(x=364, y=363)
+            pyautogui.sleep(1)
+            pyautogui.write(os.getenv("SITE"), interval=0.1)
+           
+        
+        else:
+             # Acessando o site
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+            pyautogui.press("tab")
+            pyautogui.sleep(0.3)
+
+
+            pyautogui.write(os.getenv("SITE"), interval=0.1)
+            pyautogui.press("enter")
+            pyautogui.sleep(15)
+
+
+   
     # Pesquisando produto
     pyautogui.click(x=176, y=207)
     pyautogui.sleep(7)
@@ -44,9 +103,10 @@ def abrir_site_e_pesquisar():
     screenshot_filtro = pyautogui.screenshot(region=(x_filtro, y_filtro, w_filtro, h_filtro))
     data_filtro = pytesseract.image_to_data(screenshot_filtro, output_type=pytesseract.Output.DICT)
 
+        
+    # Cálculo de similaridade com a palavra "filtro"
     for i in range(len(data_filtro["text"])):
         palavra = data_filtro["text"][i].strip().replace(" ", "").replace("R$", "").replace(",", "").replace(".", "")
-        # Cálculo de similaridade com a palavra "filtro"
         similaridade = fuzz.ratio(palavra.lower(), "filtro")
 
         if similaridade >= 70:  # Aceita palavras próximas como "filt", "fitro", etc.
@@ -64,22 +124,43 @@ def abrir_site_e_pesquisar():
             pyautogui.sleep(1)
             pyautogui.scroll(-9)
             filtro_encontrado = True
-            break  # Interrompe após encontrar e clicar
+           
 
     # Caso não tenha encontrado "Filtro", aplicar manualmente
     if not filtro_encontrado:
-        # Aplicando filtros
-        pyautogui.click(x=199, y=640)
-        pyautogui.sleep(4)
-        #pyautogui.click(x=328, y=263)
-        #pyautogui.sleep(1)
-        pyautogui.scroll(-20)
+        pyautogui.keyDown('ctrl')
+        pyautogui.hotkey('ctrl', '-')
+        pyautogui.hotkey('ctrl', '-')
+        pyautogui.hotkey('ctrl', '-')
+        pyautogui.sleep(5)
+
+        # Levando o mouse para a área de filtro
+        pyautogui.moveTo(x=85, y=352)
         pyautogui.sleep(3)
-        pyautogui.click(x=54, y=626)
-        pyautogui.write("200", interval=0.1)
-        pyautogui.sleep(0.1)
-        pyautogui.click(x=168, y=624)
-        pyautogui.write("900", interval=0.1)
+
+        # Procurando Inputs precos
+        x_width, y_width, w_width, h_width = 14, 446, 176, 489
+        screenshot_width = pyautogui.screenshot(region=(x_width, y_width, w_width, h_width))
+        data_width = pytesseract.image_to_data(screenshot_width, output_type=pytesseract.Output.DICT)
+
+        # Cálculo de similaridade com a palavra "filtro"
+        for i in range(len(data_width["text"])):
+            price = data_filtro["text"][i].strip()
+            similaridade = fuzz.ration(price, "Min")
+
+            if similaridade >= 70:
+
+                text_x = int(data_width["left"][i])
+                text_y = int(data_width["left"][i])
+                text_w = int(data_width["left"][i])
+                text_h = int(data_width["left"][i])
+
+
+
+                real_x = x_filtro + text_x + text_w // 2
+                real_y = y_filtro + text_y + text_h // 2
+                pyautogui.click(real_x, real_y)
+                break
 
 
 
