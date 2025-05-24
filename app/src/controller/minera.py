@@ -16,11 +16,7 @@ load_dotenv(dotenv_path)
 
 
 def abrir_site_e_pesquisar():
-    pyautogui.PAUSE = 1.0
-   
-   
-        
-            
+    pyautogui.PAUSE = 1.0     
     
     # Entrando no navegador
     pyautogui.press("win")
