@@ -22,7 +22,7 @@ def abrir_site_e_pesquisar():
         
             
     
-
+    # Entrando no navegador
     pyautogui.press("win")
     pyautogui.sleep(3)
     pyautogui.write("Firefox", interval=0.09)
@@ -38,7 +38,7 @@ def abrir_site_e_pesquisar():
     for i in range(len(data_nav)):
 
         palavra = data_nav["text"][i].strip()
-        similaridade = fuzz.ratio(palavra.lower(), "Pesquisar com Google ou introduzir endereço")
+        similaridade = fuzz.ratio(palavra.lower(), "Pesquisar com Google ou introduzir endereço") #  qual a similaridade da string
 
         if similaridade >= 70:  # Aceita palavras próximas como "filt", "fitro", etc.
             text_x = int(data_nav["left"][i])
@@ -92,12 +92,13 @@ def abrir_site_e_pesquisar():
     # Pesquisando produto
     pyautogui.click(x=176, y=207)
     pyautogui.sleep(7)
-    pyautogui.write(os.getenv("TARGET"), interval=0.01)
+    #celular e smartphones
+    pyautogui.write(os.getenv("TARGET"), interval=0.01) 
     pyautogui.press("enter")
     pyautogui.sleep(25)
 
 
-    # Buscando capo filtro
+    # Buscando campo filtro | BTN
     filtro_encontrado = False
     x_filtro, y_filtro, w_filtro, h_filtro = 23, 249, 972, 422
     screenshot_filtro = pyautogui.screenshot(region=(x_filtro, y_filtro, w_filtro, h_filtro))
@@ -150,13 +151,14 @@ def abrir_site_e_pesquisar():
 
             if similaridade >= 70:
 
+                # Local onde o btn preço esta
                 text_x = int(data_width["left"][i])
                 text_y = int(data_width["left"][i])
                 text_w = int(data_width["left"][i])
                 text_h = int(data_width["left"][i])
 
 
-
+                # clicando no campo
                 real_x = x_filtro + text_x + text_w // 2
                 real_y = y_filtro + text_y + text_h // 2
                 pyautogui.click(real_x, real_y)
