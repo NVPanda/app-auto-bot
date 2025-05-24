@@ -5,6 +5,9 @@ import os
 from PIL import Image
 from dotenv import load_dotenv
 from rapidfuzz import fuzz
+import cv2
+import numpy as np
+
 
 
 executando = {"valor": False}
@@ -19,68 +22,77 @@ def abrir_site_e_pesquisar():
     pyautogui.PAUSE = 1.0
    
    
-        
-            
     
     # Entrando no navegador
+
     pyautogui.press("win")
     pyautogui.sleep(3)
     pyautogui.write("Firefox", interval=0.09)
     pyautogui.press("enter")
     pyautogui.sleep(10)
 
-     # Abrindo o navegador
+
+
+
+    # Coordenadas da barra de endereço
     x_nav, y_nav, w_nav, h_nav = 49, 34, 648, 135
-    screenshot_nav = pyautogui.screenshot(region=(x_nav,y_nav,w_nav,h_nav))
-    data_nav = pytesseract.image_to_string(screenshot_nav,output_type=pytesseract.Output.DICT)
+    screenshot = pyautogui.screenshot(region=(x_nav, y_nav, w_nav, h_nav))
+    img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
+    # Pré-processamento com OpenCV
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (3, 3), 0)
+    _, thresh = cv2.threshold(blur, 160, 255, cv2.THRESH_BINARY)
 
-    for i in range(len(data_nav)):
+    #Salvar temporariamente se quiser depurar
+    cv2.imwrite("debug_barra.png", thresh)
 
-        palavra = data_nav["text"][i].strip()
-        similaridade = fuzz.ratio(palavra.lower(), "Pesquisar com Google ou introduzir endereço") #  qual a similaridade da string
+    # OCR com pytesseract
+    custom_config = r'--oem 3 --psm 6'
+    data = pytesseract.image_to_data(thresh, config=custom_config, output_type=pytesseract.Output.DICT)
 
-        if similaridade >= 70:  # Aceita palavras próximas como "filt", "fitro", etc.
-            text_x = int(data_nav["left"][i])
-            text_y = int(data_nav["top"][i])
-            text_w = int(data_nav["width"][i])
-            text_h = int(data_nav["height"][i])
+    frases_referencia = [
+        "pesquisar com google ou introduzir endereço",
+        "search with google or type a url",
+        "pesquise com o google ou digite um endereço"
+    ]
 
-            real_x = x_filtro + text_x + text_w // 2
-            real_y = y_filtro + text_y + text_h // 2
+    encontrou = False
 
-            pyautogui.click(real_x, real_y)
-            pyautogui.sleep(5)
-            pyautogui.click(x=364, y=363)
-            pyautogui.sleep(1)
-            pyautogui.write(os.getenv("SITE"), interval=0.1)
-           
+    for i in range(len(data["text"])):
+        palavra = data["text"][i].strip().lower()
+        if not palavra:
+            continue
+
+        for ref in frases_referencia:
+            similaridade = fuzz.partial_ratio(palavra, ref)
+            if similaridade >= 70:
+                text_x = int(data["left"][i])
+                text_y = int(data["top"][i])
+                text_w = int(data["width"][i])
+                text_h = int(data["height"][i])
+
+                real_x = x_nav + text_x + text_w // 2
+                real_y = y_nav + text_y + text_h // 2
+
+                pyautogui.click(real_x, real_y)
+                time.sleep(1)
+                pyautogui.write(os.getenv("SITE"), interval=0.1)
+                pyautogui.press("enter")
+                time.sleep(15)
+                print("✅ Barra detectada e site digitado")
+                encontrou = True
+               
+
         
         else:
-             # Acessando o site
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
+            # Acessando o site
+            pyautogui.sleep(3)
+            pyautogui.hotkey('ctrl', 'l') 
 
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
-
-            pyautogui.press("tab")
-            pyautogui.sleep(0.3)
+            pyautogui.write("olx.com.br", interval=0.1)
+            pyautogui.press("enter")
+            pyautogui.sleep(20)
 
 
             pyautogui.write(os.getenv("SITE"), interval=0.1)
@@ -88,14 +100,69 @@ def abrir_site_e_pesquisar():
             pyautogui.sleep(15)
 
 
-   
-    # Pesquisando produto
-    pyautogui.click(x=176, y=207)
-    pyautogui.sleep(7)
-    #celular e smartphones
-    pyautogui.write(os.getenv("TARGET"), interval=0.01) 
-    pyautogui.press("enter")
-    pyautogui.sleep(25)
+    # Coordenadas da área do campo de busca (ajuste conforme necessário)
+    x_pesquisar, y_pesquisar, w_pesquisar, h_pesquisar = 49, 34, 648, 135
+    
+    # Captura da região
+    screenshot = pyautogui.screenshot(region=(x_pesquisar, y_pesquisar, w_pesquisar, h_pesquisar))
+    img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+    
+    # Pré-processamento
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (3, 3), 0)
+    _, thresh = cv2.threshold(blur, 160, 255, cv2.THRESH_BINARY)
+    
+    # OCR
+    custom_config = r'--oem 3 --psm 6'
+    data = pytesseract.image_to_data(thresh, config=custom_config, output_type=pytesseract.Output.DICT)
+    
+    # Frases possíveis no campo de busca
+    frases_referencia = [
+        "buscar",
+        "buscar celular",
+        "buscar carro",
+        "buscar apartamento"
+    ]
+    
+    # Busca e digita
+    encontrou = False
+    
+    for i in range(len(data["text"])):
+        palavra = data["text"][i].strip().lower()
+        if not palavra:
+            continue
+        
+        for ref in frases_referencia:
+            similaridade = fuzz.partial_ratio(palavra, ref)
+            if similaridade >= 70:
+                text_x = int(data["left"][i])
+                text_y = int(data["top"][i])
+                text_w = int(data["width"][i])
+                text_h = int(data["height"][i])
+    
+                real_x = x_pesquisar + text_x + text_w // 2
+                real_y = y_pesquisar + text_y + text_h // 2
+    
+                pyautogui.click(real_x, real_y)
+                time.sleep(1)
+                pyautogui.write(os.getenv("TARGET"), interval=0.1)
+                pyautogui.press("enter")
+                time.sleep(3)
+                print("✅ Campo de busca detectado e preenchido")
+                break
+                encontrou = True
+                
+    if not encontrou:
+        # Pesquisando produto
+        pyautogui.click(x=176, y=207)
+        pyautogui.sleep(7)
+        #celular e smartphones
+        pyautogui.write(os.getenv("TARGET"), interval=0.01) 
+        pyautogui.press("enter")
+        pyautogui.sleep(25)
+            
+            
+    
 
 
     # Buscando campo filtro | BTN
