@@ -288,3 +288,76 @@ def capturar_e_ler_preco(page):
 
         return logs
 
+text_w // 2
+
+    real_y = y + text_y + text_h // 2
+    pyautogui.click(real_x, real_y)
+    pyautogui.sleep(5)
+
+    # tentativa de clicar no botão de chat
+    x_chat, y_chat, w_chat, h_chat = 690, 191, 951, 688
+    screenshot_chat = pyautogui.screenshot(region=(x_chat, y_chat, w_chat, h_chat))
+    texto_chat = pytesseract.image_to_string(screenshot_chat)
+    logs.append("Texto capturado (chat): " + texto_chat)
+    if "Chat" in texto_chat:
+        logs.append("✅ Botão 'Chat' encontrado!")
+        data_chat = pytesseract.image_to_data(screenshot_chat, output_type=pytesseract.Output.DICT)
+
+        for i in range(len(data_chat["text"])):
+            if "Chat" in data_chat["text"][i]:
+                cx = int(data_chat["left"][i])
+                cy = int(data_chat["top"][i])
+                cw = int(data_chat["width"][i])
+                ch = int(data_chat["height"][i])
+
+                real_cx = x_chat + cx + cw // 2
+                real_cy = y_chat + cy + ch // 2
+
+                logs.append(f"🖱️ Clicando no botão Chat: {real_cx}, {real_cy}")
+                pyautogui.click(real_cx, real_cy)
+                time.sleep(4)
+
+                # Capturando a área do chat
+                x_campo, y_campo, w_campo, h_campo = 516, 275, 939, 748
+                screenshot_input = pyautogui.screenshot(region=(x_campo, y_campo, w_campo, h_campo))
+                input_chat = pytesseract.image_to_string(screenshot_input)
+                logs.append("Input area capturado: " + input_chat)
+                if "Digite uma mensagem...." in input_chat:
+                    logs.append("Campo input encontrado.")
+                    data_input = pytesseract.image_to_data(screenshot_input, output_type=pytesseract.Output.DICT)
+
+                    for i in range(len(data_input["text"])):
+                        if "Chat" in data_input["text"][i]:
+                            cx = int(data_input["left"][i])
+                            cy = int(data_input["top"][i])
+                            cw = int(data_input["width"][i])
+                            ch = int(data_input["height"][i])
+
+                            real_cx = x_campo + cx + cw // 2
+                            real_cy = y_campo + cy + ch // 2
+
+                            logs.append(f"🖱️ Clicando no botão Chat: {real_cx}, {real_cy}")
+                            pyautogui.click(real_cx, real_cy)
+                            time.sleep(3)
+                            pyautogui.write("Ola")
+                            break
+                else:
+                    pyautogui.hotkey('alt', 'left')
+                    logs.append("❌ Input do chat não foi encontrado na imagem.")
+            else:
+                logs.append("❌ OCR reconheceu 'Chat', mas não conseguiu extrair posição.")
+    else:
+        logs.append("❌ Texto 'Chat' não foi detectado na imagem.")
+    else:
+        logs.append("❌ Valor desejado não encontrado na imagem.")
+    except Exception as e:
+        logs.append(f"Erro ao capturar/leitura OCR: {e}")
+        logs.append("Talvez esteja faltando o pacote `gnome-screenshot`.")
+        logs.append("Use: sudo apt install gnome-screenshot")
+    return logs
+# Exemplo de uso
+if __name__ == "__main__":
+    page = 1
+    logs = capturar_e_ler_preco(page)
+    for log in logs:
+        print(log)
